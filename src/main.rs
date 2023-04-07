@@ -24,6 +24,39 @@ fn error_check(check: bool) -> Result<i8, &'static str> {
     }
 }
 
+fn print_2(value: &String) {
+    println!("{value}");
+}
+
+fn print_3(value: &String, value_two: &String) {
+    println!("{value}");
+    println!("{value_two}");
+}
+
+fn print_4(value: &mut i8) {
+    *value += 1;
+    println!("In function the values is: {}", value);
+}
+
+fn get_highest<'a>(first_number: &'a i8, second_number: &'a i8) -> &'a i8 {
+    if first_number > second_number {
+            first_number
+    }else {
+        second_number
+    }
+}
+
+fn filter<'a, 'b>(first_number:&'a i8, second_number: &'b i8) -> &'a i8 {
+    if first_number < second_number {
+        // &0
+        let y = 0;
+        let _ = &y;
+        &0
+    } else {
+        first_number
+    }
+}
+
 fn main() {
     print("Hello World");
     let number: u8 = 255;
@@ -118,5 +151,76 @@ fn main() {
     // let rusult: i8 = error_check(true).expect("this has been caught");
 
     println!();
+
+    let one: i8 = 10;
+    let two: i8 = one + 5;
+    println!("{one}");
+    println!("{two}");
+
+    let one = "one".to_string();
+    let two = one.to_owned() + " two";
+    println!("{}", one);
+    println!("{}", two);
+
+    println!();
+
+    let one = "one".to_string();
+    print_2(&one);
+    println!("{one}");
+
+    println!();
+
+    let one = "one".to_string();
+    print_3(&one, &one);
+    println!("{one}");
+
+    println!();
+
+    let mut one: i8 = 5;
+    print_4(&mut one);
+    let mut two = &mut one;
+    *two += 1;
+    two = &mut (*two + 1);
+    println!("In main hte value is: {one}");
+
+    println!();
+
+    let one = "one";
+    let two: &str;
+
+    {
+        println!("{one}");
+        two = "two";
+    }
+    println!("{one}");
+    println!("{two}");
+
+    println!();
+
+    // let one: &i8;
+    // {
+    //     let two: i8 = 2;
+    //     one = &two;
+    // }
+    // println!("r: {one}");
+
+    // let one: i8 = 1;
+    // let outcome: &i8;
+    // {
+    //     let two: i8 = 2;
+    //     let outcome: &i8 = get_highest(&one, &two);
+    // }
+    // println!("{outcome}");
+
+    let one: i8 = 3;
+    let outcome: &i8;
+    {
+        let two = 2;
+        outcome = filter(&one, &two);
+    }
+    println!("{outcome}");
+
+    println!()
+
     
 }
