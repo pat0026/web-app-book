@@ -3,7 +3,7 @@ mod state;
 mod to_do;
 
 use std::thread::JoinHandle;
-use std::{env, thread, time};
+use std::{env, thread, time, result};
 
 use serde_json::value::Value;
 use serde_json::Map;
@@ -15,7 +15,14 @@ use to_do::to_do_factory;
 
 use actix_web::{web, App, HttpRequest, HttpServer, Responder};
 
-fn do_something(number: i8) -> i8 {
+use futures::executor::block_on;
+use futures::join;
+
+use std::vec::Vec;
+use async_std;
+use futures::future::join_all;
+
+async fn do_something(number: i8) -> i8 {
     println!("number {} is running", number);
     let two_seconds = time::Duration::new(2, 0);
     thread::sleep(two_seconds);
@@ -23,40 +30,62 @@ fn do_something(number: i8) -> i8 {
 }
 
 fn main() {
-    // let now = time::Instant::now();
-    // let one: i8 = do_something(1);
-    // let two: i8 = do_something(2);
-    // let three: i8 = do_something(3);
-
-    // println!("time elapsed {:?}", now.elapsed());
-    // println!("result {}", one + two + three);
-
     let now = time::Instant::now();
-    let thread_one: JoinHandle<i8> = thread::spawn(|| do_something(1));
-    let thread_two: JoinHandle<i8> = thread::spawn(|| do_something(2));
-    let thread_three: JoinHandle<i8> = thread::spawn(|| do_something(3));
-
-    let result_one = thread_one.join();
-    let result_two = thread_two.join();
-    let result_three = thread_three.join();
-
+    let future_one = do_something(1);
+    let two_seconds = time::Duration::new(2,0);
+    thread::sleep(two_seconds);
+    let outcome = block_on(future_one);
     println!("time elapsed {:?}", now.elapsed());
+    println!("Here is the outcome: {}", outcome);
 
-    match result_one {
-        Ok(result) => {
-            println!("the result for thread one is {}", result);
-        }
-        Err(ref result) => {
-            if let Some(string) = result.downcast_ref::<String>() {
-                println!("the error for thread one is: {}", string);
-            } else {
-                println!("ther error for thread one does not have a message");
-            }
-        }
+    let future_two = async {
+        return do_something(2).await
+    };
+    let future_two = block_on(future_two);
+    println!("Here is the outcome: {:?}", future_two);
+
+    let future_three = async {
+        let outcome_one = do_something(2).await;
+        let outcome_two = do_something(3).await;
+        return outcome_one + outcome_two
     };
 
-    println!(
-        "result {}",
-        result_one.unwrap() + result_two.unwrap() + result_three.unwrap()
-    );
+    let future_outcome = block_on(future_three);
+    println!("Here is the outcome: {:?}", future_outcome);
+
+    let future_four = async {
+        let outcome_one = do_something(2);
+        let outcome_two = do_something(3);
+        let results = join!( outcome_one, outcome_two);
+        return results.0 + results.1
+    };
+
+    let now = time::Instant::now();
+    let result = block_on(future_four);
+    println!("tiem elapsed {:?}", now.elapsed());
+    println!("here is the result: {:?}", result);
+
+    let async_outcome = async {
+        // 1
+        let mut futures_vec = Vec::new();
+        let future_four = do_something(4);
+        let future_five = do_something(5);
+
+        // 2
+        futures_vec.push(future_four); 
+        futures_vec.push(future_five);
+
+        // 3
+        let handles = futures_vec.into_iter().map(
+            async_std::task::spawn).collect::<Vec<_>>();
+        
+        // 4
+        let results = join_all(handles).await;
+        return results.into_iter().sum::<i8>();
+    };
+
+    let now = time::Instant::now();
+    let result = block_on(async_outcome);
+    println!("time elapsed for join vec {:?}", now.elapsed());
+    println!("Here is the result: {:?}", result);
 }
