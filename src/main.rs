@@ -12,20 +12,23 @@ use state::read_file;
 use to_do::enums::TaskStatus;
 use to_do::to_do_factory;
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    let command: &String = &args[1];
-    let title: &String = &args[2];
+use actix_web::{web, App, HttpServer, Responder, HttpRequest};
 
-    let state: Map<String, Value> = read_file("./state.json");
+async fn greet(req: HttpRequest) -> impl Responder {
+    let name = req.match_info().get("name").unwrap_or("World");
+    format!("Hello {}!", name)
+}
 
-    let status = match state.get(title) {
-        Some(result) => result.to_string().replace('\"', ""),
-        None => "pending".to_owned(),
-    };
-
-    let item = to_do_factory(title, 
-                    TaskStatus::from_string(status.to_uppercase()));
-    
-    process_input(item, command.clone(), &state);
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        App::new()
+        .route("/", web::get().to(greet))
+        .route("/{name}", web::get().to(greet))
+        .route("/say/hello", web::get().to(||
+                async {"Hello Again!"}))
+    })
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
 }
