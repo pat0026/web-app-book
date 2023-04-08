@@ -1,6 +1,96 @@
 use std::collections::HashMap;
 
 #[derive(Debug)]
+struct Human<'a> {
+    name: &'a str,
+    age: i8,
+    current_thought: &'a str,
+}
+
+#[derive(Debug)]
+struct HumanString {
+    name: String,
+    age: i8,
+    current_thought: Option<String>,
+    friend: Friend,
+}
+
+impl HumanString {
+    fn new(name: &str, age: i8) -> HumanString {
+        HumanString {
+            name: name.to_string(),
+            age,
+            current_thought: None,
+            friend: Friend::NIL,
+        }
+    }
+
+    fn with_thought(mut self, thought: &str) -> HumanString {
+        self.current_thought = Some(thought.to_string());
+        self
+    }
+
+    fn with_friend(mut self, friend: Box<HumanString>) -> HumanString {
+        self.friend = Friend::HUMAN(friend);
+        self
+    }
+}
+
+struct AdminUser {
+    username: String,
+    password: String,
+}
+
+struct User {
+    username: String,
+    password: String,
+}
+
+trait CanEdit {
+    fn edit(&self) {
+        println!("admin is editing");
+    }
+}
+
+trait CanCreate {
+    fn create(&self) {
+        println!("admin is creating");
+    }
+}
+
+trait CanDelete {
+    fn delete(&self) {
+        println!("admin is deleting");
+    }
+}
+
+impl CanDelete for AdminUser {}
+impl CanCreate for AdminUser {}
+impl CanEdit for AdminUser {}
+
+impl CanEdit for User {
+    fn edit(&self) {
+        println!("A standard user {} is editing", self.username);
+    }
+}
+
+struct Coordinate <T> {
+    x: T,
+    y: T,
+}
+
+struct Coordinate_xy <T, X> {
+    x: T,
+    y: X
+}
+
+#[derive(Debug)]
+enum Friend {
+    HUMAN(Box<HumanString>),
+    NIL,
+}
+
+#[derive(Debug)]
 enum CharacterValue {
     Name(String),
     Age(i32),
@@ -10,6 +100,18 @@ enum CharacterValue {
 enum SomeValue {
     StringValue(String),
     IntValue(i32),
+}
+
+fn create<T: CanCreate>(user: &T) {
+    user.create();
+}
+
+fn edit<T: CanEdit>(user: &T) {
+    user.edit();
+}
+
+fn delete<T: CanDelete>(user: &T) {
+    user.delete();
 }
 
 fn print(message: &str) {
@@ -40,13 +142,13 @@ fn print_4(value: &mut i8) {
 
 fn get_highest<'a>(first_number: &'a i8, second_number: &'a i8) -> &'a i8 {
     if first_number > second_number {
-            first_number
-    }else {
+        first_number
+    } else {
         second_number
     }
 }
 
-fn filter<'a, 'b>(first_number:&'a i8, second_number: &'b i8) -> &'a i8 {
+fn filter<'a, 'b>(first_number: &'a i8, second_number: &'b i8) -> &'a i8 {
     if first_number < second_number {
         // &0
         let y = 0;
@@ -54,6 +156,14 @@ fn filter<'a, 'b>(first_number:&'a i8, second_number: &'b i8) -> &'a i8 {
         &0
     } else {
         first_number
+    }
+}
+
+macro_rules! capitalize {
+    ($a: expr) => {
+        let mut v: Vec<char> = $a.chars().collect();
+        v[0] = v[0].to_uppercase().nth(0).unwrap();
+        $a = v.into_iter().collect();
     }
 }
 
@@ -220,7 +330,76 @@ fn main() {
     }
     println!("{outcome}");
 
-    println!()
+    println!();
 
-    
+    let developer = Human {
+        name: "Maxwell Flitton",
+        age: 32,
+        current_thought: "nothing",
+    };
+
+    println!("{:?}", developer);
+    println!("{}", developer.name);
+
+    println!();
+
+    let another_developer = HumanString {
+        name: "Caroline Morton".to_string(),
+        age: 30,
+        current_thought: Some("I need to code!!".to_string()),
+        friend: Friend::NIL,
+    };
+
+    let developer = HumanString {
+        name: "Maxwell Flitton".to_string(),
+        age: 32,
+        current_thought: Some("nothing".to_string()),
+        friend: Friend::HUMAN(Box::new(another_developer)),
+    };
+
+    match developer.friend {
+        Friend::HUMAN(data) => {
+            println!("{}", data.name)
+        }
+        Friend::NIL => {}
+    }
+
+    println!();
+
+    let developer_friend = HumanString::new("Caroline Morton", 30);
+
+    let developer = HumanString::new("Maxwell Flitton", 32)
+        .with_thought("I love Rust!")
+        .with_friend(Box::new(developer_friend));
+    println!("{:?}", developer);
+
+    println!();
+
+    let admin = AdminUser{
+        username: "admin".to_string(),
+        password: "password".to_string()
+    };
+    let user = User{
+        username: "user".to_string(),
+        password: "password".to_string()
+    };
+
+    create(&admin);
+    edit(&admin);
+    edit(&user);
+    delete(&admin);
+
+    println!();
+
+    let one = Coordinate{x:50, y: 50};
+    let two = Coordinate{x:500, y: 500};
+    let three = Coordinate{x:5.6, y: 5.6};
+
+    let one = Coordinate_xy {x: 50, y: 500};
+    let two = Coordinate_xy {x: 5.6, y: 500};
+    let three = Coordinate_xy {x: 5.6, y: 50};
+
+    let mut x = String::from("test");
+    capitalize!(x);
+    println!("{x}");
 }
