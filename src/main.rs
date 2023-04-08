@@ -1,27 +1,31 @@
-mod to_do;
+mod processes;
 mod state;
-
-use to_do::to_do_factory;
-use to_do::enums::TaskStatus;
-use to_do::ItemTypes;
-
-use crate::to_do::traits::get::Get;
-use to_do::traits::delete::Delete;
-use to_do::traits::edit::Edit;
+mod to_do;
 
 use std::env;
-use state::{write_to_file, read_file};
+
 use serde_json::value::Value;
-use serde_json::{Map, json};
+use serde_json::Map;
+
+use processes::process_input;
+use state::read_file;
+use to_do::enums::TaskStatus;
+use to_do::to_do_factory;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let status: &String = &args[1];
+    let command: &String = &args[1];
     let title: &String = &args[2];
-    let mut state: Map<String, Value> = 
-        read_file("./state.json");
-    println!("Before operation: {:?}", state);
-    state.insert(title.to_string(), json!(status));
-    println!("After operation: {:?}", state);
-    write_to_file("./state.json", &state)
+
+    let state: Map<String, Value> = read_file("./state.json");
+
+    let status = match state.get(title) {
+        Some(result) => result.to_string().replace('\"', ""),
+        None => "pending".to_owned(),
+    };
+
+    let item = to_do_factory(title, 
+                    TaskStatus::from_string(status.to_uppercase()));
+    
+    process_input(item, command.clone(), &state);
 }
