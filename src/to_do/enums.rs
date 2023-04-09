@@ -37,7 +37,7 @@ impl Serialize for TaskStatus {
     where
         S: Serializer,
     {
-        Ok(serializer.serialize_str(self.to_string().as_str())?)
+        serializer.serialize_str(self.to_string().as_str())
     }
 }
 
