@@ -6,6 +6,7 @@ mod processes;
 mod state;
 mod to_do;
 mod views;
+mod jwt;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

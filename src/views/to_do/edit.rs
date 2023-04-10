@@ -9,8 +9,10 @@ use crate::to_do::{to_do_factory, enums::TaskStatus};
 use crate::json_serialization::{to_do_item::ToDoItem,
                                 to_do_items::ToDoItems};
 use crate::processes::process_input;
+use crate::jwt::JWToken;
 
-pub async fn edit(to_do_item: web::Json<ToDoItem>) ->HttpResponse {
+pub async fn edit(to_do_item: web::Json<ToDoItem>, token: JWToken) -> HttpResponse {
+    println!("here is the message in the token: {}", token.message);
     let state: Map<String, Value> = read_file("./state.json");
 
     let status: TaskStatus;
