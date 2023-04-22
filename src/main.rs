@@ -1,5 +1,6 @@
 use actix_service::Service;
 use actix_web::{App, HttpServer};
+use actix_cors::Cors;
 
 mod json_serialization;
 mod processes;
@@ -11,9 +12,13 @@ mod jwt;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
+        let cors = Cors::default().allow_any_origin()
+                                .allow_any_method()
+                                .allow_any_header();
+
         let app = App::new()
             .wrap_fn(|req, srv| {
-                println!("{:?}", req);
+                println!("{}-{}", req.method(), req.uri());
                 let future = srv.call(req);
 
                 async {
@@ -21,7 +26,7 @@ async fn main() -> std::io::Result<()> {
                     Ok(result)
                 }
             })
-            .configure(views::views_factory);
+            .configure(views::views_factory).wrap(cors);
         app
     })
     .bind("0.0.0.0:8000")?
