@@ -1,4 +1,4 @@
-#[macro_use] 
+#[macro_use]
 extern crate diesel;
 extern crate dotenv;
 
@@ -14,6 +14,7 @@ mod views;
 mod jwt;
 mod database;
 mod schema;
+mod models;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
