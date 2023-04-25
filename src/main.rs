@@ -1,4 +1,5 @@
-#[macro_use] extern crate diesel;
+#[macro_use] 
+extern crate diesel;
 extern crate dotenv;
 
 use actix_service::Service;
