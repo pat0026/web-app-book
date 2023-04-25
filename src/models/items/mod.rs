@@ -1,2 +1,2 @@
-mod item;
-mod new_item;
+pub mod item;
+pub mod new_item;
