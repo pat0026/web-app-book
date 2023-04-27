@@ -1,10 +1,6 @@
 use super::base::Base;
 use super::super::enums::TaskStatus;
 
-use super::super::traits::get::Get;
-use super::super::traits::delete::Delete;
-use super::super::traits::edit::Edit;
-
 pub struct Done {
     pub super_struct: Base
 }
@@ -18,7 +14,3 @@ impl Done {
         Self{super_struct: base}
     }
 }
-
-impl Get for Done {}
-impl Delete for Done {}
-impl Edit for Done {}
