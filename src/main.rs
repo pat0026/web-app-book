@@ -7,7 +7,7 @@ use actix_web::{App, HttpServer};
 use actix_cors::Cors;
 
 mod json_serialization;
-mod processes;
+// mod processes;
 mod state;
 mod to_do;
 mod views;
@@ -15,6 +15,7 @@ mod jwt;
 mod database;
 mod schema;
 mod models;
+mod config;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
