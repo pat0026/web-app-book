@@ -4,4 +4,4 @@ CREATE TABLE to_do (
     title VARCHAR NOT NULL,
     status VARCHAR NOT NULL,
     date timestamp NOT NULL DEFAULT NOW()
-)
+);
