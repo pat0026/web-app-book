@@ -15,8 +15,7 @@ use crate::config::Config;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JWToken {
     pub user_id: i32,
-    #[serde(with = "ts_seconds")]
-    pub minted: DateTime<Utc>
+    pub exp: usize,
 }
 
 impl JWToken{
@@ -37,11 +36,17 @@ impl JWToken{
     }
 
     pub fn new(user_id: i32) -> Self {
-        let timestamp = Utc::now();
-        JWToken { user_id , minted: timestamp }
+        let config = Config::new();
+        let minutes = config.map.get("EXPIRE_MINUTES")
+            .unwrap().as_i64().unwrap();
+        let expiration = Utc::now()
+            .checked_add_signed(chrono::Duration::minutes(minutes))
+            .expect("invalid timestamp")
+            .timestamp();
+        JWToken {user_id , exp: expiration as usize}
     }
 
-    pub fn from_token(token: String) -> Option<Self> {
+    pub fn from_token(token: String) -> Result<Self, String> {
         let key = DecodingKey
             ::from_secret(JWToken::get_key().as_ref());
         let token_result = decode::<JWToken>(
@@ -50,10 +55,11 @@ impl JWToken{
 
         match token_result {
             Ok(data) => {
-                Some(data.claims)
+                Ok(data.claims)
             },
-            Err(_) => {
-                None
+            Err(error) => {
+                let message = format!("{error}");
+                Err(message)
             }
         }
     }
@@ -75,22 +81,21 @@ impl FromRequest for JWToken {
                 );
 
                 match token_result {
-                    Some(token) => {
+                    Ok(token) => {
                         ok(token)
                     },
-                    None => {
-                        let error = ErrorUnauthorized(
-                            "token can't be decoded"
-                        );
-                        err(error)
+                    Err(message) => {
+                        if message == "ExpiredSignature" {
+                             return err(ErrorUnauthorized("token expired"))
+                        } 
+                        err(ErrorUnauthorized("token can't be decoded"))
                     }
                 }
             },
             None => {
-                let error = ErrorUnauthorized(
+                err(ErrorUnauthorized(
                     "token not in header under key 'token'"
-                );
-                err(error)
+                ))
             }
         }
 
