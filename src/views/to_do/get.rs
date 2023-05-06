@@ -5,7 +5,7 @@ use serde_json::Map;
 use crate::state::read_file;
 use crate::to_do::{ItemTypes, to_do_factory, enums::TaskStatus};
 use crate::json_serialization::to_do_items::ToDoItems;
-use crate::database::DB;
+use crate::jwt::JWToken;
 
 
 /// Alternative to the get_state() function
@@ -26,6 +26,6 @@ use crate::database::DB;
 //     web::Json(return_package)
 // }
 
-pub async fn get(db:DB) -> impl Responder {
-    ToDoItems::get_state(db)
+pub async fn get(token: JWToken) -> impl Responder {
+    ToDoItems::get_state(token.user_id)
 }
