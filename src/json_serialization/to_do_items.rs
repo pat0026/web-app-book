@@ -1,7 +1,7 @@
 use crate::diesel;
 use diesel::prelude::*;
 
-use crate::database::DB;
+use crate::database::{DB, establish_connection};
 use crate::models::items::item::Item;
 use crate::schema::to_do;
 
@@ -48,12 +48,15 @@ impl ToDoItems {
         }
     }
 
-    pub fn get_state(db: DB) -> ToDoItems {
-        let mut array_buffer = Vec::new();
+    pub fn get_state(user_id: i32) -> ToDoItems {
+        let connection = establish_connection();
 
         let items = to_do::table
+        .filter(to_do::columns::user_id.eq(&user_id))
         .order(to_do::columns::id.asc())
-        .load::<Item>(&db.connection).unwrap();
+        .load::<Item>(&connection).unwrap();
+
+        let mut array_buffer = Vec::with_capacity(items.len());
         
         for item in items {
             let status = TaskStatus::new(item.status.as_str());
