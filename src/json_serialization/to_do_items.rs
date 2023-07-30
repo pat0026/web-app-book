@@ -9,14 +9,15 @@ use actix_web::{
     HttpRequest, HttpResponse, Responder
 };
 
-use crate::database::estalbish_connection;
-
 use crate::to_do::structs::base::Base;
 use crate::to_do::ItemTypes;
 use crate::state::read_file;
 use crate::to_do::{to_do_factory, enums::TaskStatus};
 
 use surrealdb::sql::Thing;
+use std::time::Instant;
+
+use crate::CLIENT;
 
 #[derive(Serialize)]
 pub struct ToDoItems {
@@ -56,9 +57,10 @@ impl ToDoItems {
     }
 
     pub async fn get_state() -> ToDoItems {
-        let connection = estalbish_connection().await.expect("Error in establishing connection");
-        let hehe: Vec<Record> = connection.select("to_do").await.expect("hehe");
+        let now = Instant::now();
+        let hehe: Vec<Record> = CLIENT.get().unwrap().select("to_do").await.expect("hehe");
         println!("{:?}", hehe);
+        println!("{}", now.elapsed().as_secs_f64());
         println!("Connection made");
         let state: Map<String, Value> = read_file("./state.json");
         let mut array_buffer = Vec::new();
