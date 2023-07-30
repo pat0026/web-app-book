@@ -22,10 +22,10 @@ pub async fn edit(to_do_item: web::Json<ToDoItem>, token: JWToken) -> HttpRespon
             let existing_item = 
                 to_do_factory(to_do_item.title.as_str(), status.clone());
             if status.to_string() == to_do_item.status {
-                return HttpResponse::Ok().json(ToDoItems::get_state());
+                return HttpResponse::Ok().json(ToDoItems::get_state().await);
             } else {
                 process_input(existing_item, "edit".to_owned(), &state);
-                return HttpResponse::Ok().json(ToDoItems::get_state());
+                return HttpResponse::Ok().json(ToDoItems::get_state().await);
             }
         },
         None => {

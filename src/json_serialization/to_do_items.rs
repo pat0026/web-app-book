@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use std::vec::Vec;
 
 use serde_json::value::Value;
@@ -9,10 +9,14 @@ use actix_web::{
     HttpRequest, HttpResponse, Responder
 };
 
+use crate::database::estalbish_connection;
+
 use crate::to_do::structs::base::Base;
 use crate::to_do::ItemTypes;
 use crate::state::read_file;
 use crate::to_do::{to_do_factory, enums::TaskStatus};
+
+use surrealdb::sql::Thing;
 
 #[derive(Serialize)]
 pub struct ToDoItems {
@@ -20,6 +24,12 @@ pub struct ToDoItems {
     pub done_items: Vec<Base>,
     pub pending_item_count: i8,
     pub done_item_count: i8,
+}
+
+#[derive(Debug, Deserialize)]
+struct Record {
+    #[allow(dead_code)]
+    id: Thing,
 }
 
 impl ToDoItems {
@@ -45,7 +55,11 @@ impl ToDoItems {
         }
     }
 
-    pub fn get_state() -> ToDoItems {
+    pub async fn get_state() -> ToDoItems {
+        let connection = estalbish_connection().await.expect("Error in establishing connection");
+        let hehe: Vec<Record> = connection.select("to_do").await.expect("hehe");
+        println!("{:?}", hehe);
+        println!("Connection made");
         let state: Map<String, Value> = read_file("./state.json");
         let mut array_buffer = Vec::new();
 

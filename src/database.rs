@@ -1,0 +1,26 @@
+use dotenv::dotenv;
+use std::env;
+use surrealdb::engine::any::{connect, Any};
+use surrealdb::engine::remote::ws::{Ws, Client};
+use surrealdb::opt::auth::Root;
+use surrealdb::sql::Thing;
+use surrealdb::Surreal;
+
+pub async fn estalbish_connection() -> surrealdb::Result<Surreal<Client>>{
+    dotenv().ok();
+
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let database_user = env::var("DATABASE_USER").expect("DATABASE_USER must be set");
+    let database_password = env::var("DATABASE_PASS").expect("DATABASE_PASS must be set"); 
+    
+    // let db = connect(database_url).await?;
+    let db = Surreal::new::<Ws>("localhost:8080").await?;
+    println!("Connected");
+    db.signin( Root {
+        username: database_user.as_str(),
+        password: database_password.as_str()
+    }).await?;
+
+    db.use_ns("web_app").use_db("web_app").await?;
+    Ok(db)
+} 

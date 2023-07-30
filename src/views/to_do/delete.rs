@@ -27,5 +27,5 @@ pub async fn delete(to_do_item: web::Json<ToDoItem>, token: JWToken) -> HttpResp
     let existing_item = to_do_factory(to_do_item.title.as_str(), status);
     process_input(existing_item, "delete".to_string(), &state);
 
-    HttpResponse::Ok().json(ToDoItems::get_state())
+    HttpResponse::Ok().json(ToDoItems::get_state().await)
 }

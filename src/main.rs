@@ -1,3 +1,5 @@
+extern crate dotenv;
+
 use actix_service::Service;
 use actix_web::{App, HttpServer};
 use actix_cors::Cors;
@@ -8,6 +10,8 @@ mod state;
 mod to_do;
 mod views;
 mod jwt;
+mod database;
+mod models;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -29,7 +33,7 @@ async fn main() -> std::io::Result<()> {
             .configure(views::views_factory).wrap(cors);
         app
     })
-    .bind("0.0.0.0:8000")?
+    .bind("127.0.0.1:8000")?
     .run()
     .await
 }

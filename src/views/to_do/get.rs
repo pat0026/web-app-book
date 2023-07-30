@@ -26,5 +26,5 @@ use crate::json_serialization::to_do_items::ToDoItems;
 // }
 
 pub async fn get() -> impl Responder {
-    ToDoItems::get_state()
+    ToDoItems::get_state().await
 }

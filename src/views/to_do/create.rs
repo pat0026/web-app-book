@@ -17,5 +17,5 @@ pub async fn create(req: HttpRequest) -> HttpResponse {
 
     process_input(item, "create".to_string(), &state);
 
-    HttpResponse::Ok().json(ToDoItems::get_state())
+    HttpResponse::Ok().json(ToDoItems::get_state().await)
 }
