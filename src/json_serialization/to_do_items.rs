@@ -14,7 +14,7 @@ use crate::to_do::ItemTypes;
 use crate::state::read_file;
 use crate::to_do::{to_do_factory, enums::TaskStatus};
 
-use surrealdb::sql::Thing;
+use surrealdb::sql;
 use std::time::Instant;
 
 use crate::CLIENT;
@@ -30,7 +30,10 @@ pub struct ToDoItems {
 #[derive(Debug, Deserialize)]
 struct Record {
     #[allow(dead_code)]
-    id: Thing,
+    date: sql::Datetime,
+    id: sql::Thing,
+    status: sql::Strand,
+    title: sql::Strand
 }
 
 impl ToDoItems {
