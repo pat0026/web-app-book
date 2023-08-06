@@ -7,16 +7,16 @@ use surrealdb::opt::auth::Root;
 use surrealdb::sql::Thing;
 use surrealdb::Surreal;
 
-pub async fn estalbish_connection() -> surrealdb::Result<Surreal<Client>>{
+pub async fn estalbish_connection() -> surrealdb::Result<Surreal<Any>>{
     dotenv().ok();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let database_user = env::var("DATABASE_USER").expect("DATABASE_USER must be set");
     let database_password = env::var("DATABASE_PASS").expect("DATABASE_PASS must be set"); 
-    
-    // let db = connect(database_url).await?;
+    println!("{database_url}");
+    let db = connect(database_url).await?;
     let now = Instant::now();
-    let db = Surreal::new::<Ws>("localhost:8080").await?;
+    // let db = Surreal::new::<Ws>("localhost:8080").await?;
     println!("Connected");
     db.signin( Root {
         username: database_user.as_str(),

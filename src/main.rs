@@ -14,16 +14,18 @@ mod database;
 mod models;
 
 use database::estalbish_connection;
-use once_cell::sync::OnceCell;
-use lazy_static::lazy_static;
+// use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
+// use lazy_static::lazy_static;
 use surrealdb::engine::remote::ws::{Ws, Client};
+use surrealdb::engine::any::Any;
 use surrealdb::Surreal;
 
-static CLIENT: OnceCell<Surreal<Client>> = OnceCell::new();
+static CLIENT: OnceLock<Surreal<Any>> = OnceLock::new();
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let client = estalbish_connection().await.expect("Error client initializaiton");
+    let client: Surreal<Any> = estalbish_connection().await.expect("Error client initializaiton");
     CLIENT.set(client).unwrap();
     HttpServer::new(|| {
         let cors = Cors::default().allow_any_origin()
