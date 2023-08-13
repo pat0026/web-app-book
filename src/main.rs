@@ -13,20 +13,9 @@ mod jwt;
 mod database;
 mod models;
 
-use database::estalbish_connection;
-// use once_cell::sync::OnceCell;
-use std::sync::OnceLock;
-// use lazy_static::lazy_static;
-use surrealdb::engine::remote::ws::{Ws, Client};
-use surrealdb::engine::any::Any;
-use surrealdb::Surreal;
-
-static CLIENT: OnceLock<Surreal<Any>> = OnceLock::new();
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let client: Surreal<Any> = estalbish_connection().await.expect("Error client initializaiton");
-    CLIENT.set(client).unwrap();
+    database::estalbish_connection().await.expect("Error client initializaiton");
     HttpServer::new(|| {
         let cors = Cors::default().allow_any_origin()
                                 .allow_any_method()

@@ -17,7 +17,7 @@ use crate::to_do::{to_do_factory, enums::TaskStatus};
 use surrealdb::sql;
 use std::time::Instant;
 
-use crate::CLIENT;
+use crate::database::CLIENT;
 
 #[derive(Serialize)]
 pub struct ToDoItems {
@@ -61,7 +61,7 @@ impl ToDoItems {
 
     pub async fn get_state() -> ToDoItems {
         let now = Instant::now();
-        let hehe: Vec<Record> = CLIENT.get().unwrap().select("to_do").await.expect("hehe");
+        let hehe: Vec<Record> = CLIENT.select("to_do").await.expect("hehe");
         println!("{:?}", hehe);
         println!("{}", now.elapsed().as_secs_f64());
         println!("Connection made");
