@@ -1,23 +1,21 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::vec::Vec;
 
 use serde_json::value::Value;
 use serde_json::Map;
 
-use actix_web::{
-    body::BoxBody, http::header::ContentType,
-    HttpRequest, HttpResponse, Responder
-};
+use actix_web::{body::BoxBody, http::header::ContentType, HttpRequest, HttpResponse, Responder};
 
+use crate::state::read_file;
 use crate::to_do::structs::base::Base;
 use crate::to_do::ItemTypes;
-use crate::state::read_file;
-use crate::to_do::{to_do_factory, enums::TaskStatus};
+use crate::to_do::{enums::TaskStatus, to_do_factory};
 
-use surrealdb::sql;
 use std::time::Instant;
+use surrealdb::sql;
 
 use crate::database::CLIENT;
+use crate::models::items::{item::Item, new_item::NewItem, TO_DO};
 
 #[derive(Serialize)]
 pub struct ToDoItems {
@@ -33,7 +31,7 @@ struct Record {
     date: sql::Datetime,
     id: sql::Thing,
     status: sql::Strand,
-    title: sql::Strand
+    title: sql::Strand,
 }
 
 impl ToDoItems {
@@ -60,17 +58,13 @@ impl ToDoItems {
     }
 
     pub async fn get_state() -> ToDoItems {
-        let now = Instant::now();
-        let hehe: Vec<Record> = CLIENT.select("to_do").await.expect("hehe");
+        let hehe: Vec<Item> = CLIENT.select(TO_DO).await.expect("hehe");
         println!("{:?}", hehe);
-        println!("{}", now.elapsed().as_secs_f64());
-        println!("Connection made");
         let state: Map<String, Value> = read_file("./state.json");
         let mut array_buffer = Vec::new();
 
         for (key, value) in state {
-            let status = TaskStatus::from_string(value
-                .as_str().unwrap().to_string());
+            let status = TaskStatus::from_string(value.as_str().unwrap().to_string());
             let item = to_do_factory(&key, status);
             array_buffer.push(item);
         }

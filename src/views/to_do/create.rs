@@ -8,6 +8,8 @@ use crate::json_serialization::to_do_items::ToDoItems;
 use crate::state::read_file;
 use crate::processes::process_input;
 
+use crate::database::CLIENT;
+
 pub async fn create(req: HttpRequest) -> HttpResponse {
     let state: Map<String, Value> = read_file("./state.json");
 
